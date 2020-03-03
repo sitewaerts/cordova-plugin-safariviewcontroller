@@ -15,8 +15,8 @@
 package org.chromium.customtabsclient.shared;
 
 import android.content.ComponentName;
-import androidx.broeser.customtabs.CustomTabsClient;
-import androidx.broeser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
 
 import java.lang.ref.WeakReference;
 

@@ -14,7 +14,7 @@
 
 package org.chromium.customtabsclient.shared;
 
-import androidx.broeser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsClient;
 
 /**
  * Callback for events when connecting and disconnecting from Custom Tabs Service.
