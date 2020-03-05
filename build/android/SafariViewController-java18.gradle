@@ -5,10 +5,4 @@ cdvPluginPostBuildExtras.add({
             targetCompatibility JavaVersion.VERSION_1_8
         }
     }
-    
-    
 })
-
-dependencies {
-        implementation "androidx.browser:browser:1.2.0"
-    }
