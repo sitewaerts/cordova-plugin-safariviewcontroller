@@ -45,6 +45,7 @@
       </feature>
     </config-file>
     <framework src="build/android/SafariViewController-java18.gradle" custom="true" type="gradleReference" />
+    <framework custom="true" src="src/android/build-extras.gradle" type="gradleReference" />
     <framework src="com.android.support:customtabs:23.2.0" />
     <framework src="androidx.browser:browser:1.2.0" />
 
