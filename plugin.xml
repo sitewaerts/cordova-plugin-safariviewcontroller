@@ -46,6 +46,7 @@
     </config-file>
     <framework src="build/android/SafariViewController-java18.gradle" custom="true" type="gradleReference" />
     <framework src="com.android.support:customtabs:23.2.0" />
+    <framework src="androidx.browser:browser:1.2.0" />
 
     <source-file src="src/android/ChromeCustomTabPlugin.java"             target-dir="src/com/customtabplugin" />
     <source-file src="src/android/helpers/CustomTabServiceHelper.java"    target-dir="src/com/customtabplugin" />
