@@ -155,6 +155,7 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
         if(!TextUtils.isEmpty(transition))
             addTransition(builder, transition);
 
+        builder.setShowTitle(true);
 
         CustomTabsIntent customTabsIntent = builder.build();
 
