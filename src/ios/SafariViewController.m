@@ -27,11 +27,16 @@
     [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"bad url"] callbackId:command.callbackId];
     return;
   }
-  bool readerMode = [options[@"enterReaderModeIfAvailable"] isEqual:[NSNumber numberWithBool:YES]];
+
   self.animated = [options[@"animated"] isEqual:[NSNumber numberWithBool:YES]];
+  self.disableSharing = [options[@"disableSharing"] isEqual:[NSNumber numberWithBool:YES]];
   self.callbackId = command.callbackId;
 
-  vc = [[SFSafariViewController alloc] initWithURL:url entersReaderIfAvailable:readerMode];
+  SFSafariViewControllerConfiguration *config = [[SFSafariViewControllerConfiguration alloc] init];
+  config.barCollapsingEnabled = [options[@"barCollapsingEnabled"] isEqual:[NSNumber numberWithBool:YES]];;
+  config.entersReaderIfAvailable = [options[@"enterReaderModeIfAvailable"] isEqual:[NSNumber numberWithBool:YES]];
+  
+  vc = [[SFSafariViewController alloc] initWithURL:url configuration:config];
   vc.delegate = self;
 
   bool hidden = [options[@"hidden"] isEqualToNumber:[NSNumber numberWithBool:YES]];
@@ -43,61 +48,25 @@
     [vc didMoveToParentViewController:self.viewController];
     vc.view.frame = CGRectMake(0.0, 0.0, 0.5, 0.5);
   } else {
-    if (self.animated) {
-      // note that Apple dropped support for other animations in iOS 9.2 or 9.3 in favor of a slide-back gesture
-      vc.modalTransitionStyle = [self getTransitionStyle:options[@"transition"]];
-    }
     [self.viewController presentViewController:vc animated:self.animated completion:nil];
   }
 
-  NSString *tintColor = options[@"tintColor"];
+  int dismissButtonStyle = (int)[(NSNumber *)options[@"dismissButtonStyle"] integerValue];
+  vc.dismissButtonStyle = dismissButtonStyle * (dismissButtonStyle < 3);
+
   NSString *controlTintColor = options[@"controlTintColor"];
-  NSString *barColor = options[@"barColor"];
-
-  // if only tintColor is set, use that as the controlTintColor for iOS 10
-  if (barColor == nil && controlTintColor == nil) {
-    controlTintColor = tintColor;
-  } else if (tintColor == nil) {
-    tintColor = controlTintColor;
-  }
-
-  if (tintColor != nil) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS 10.0 supported (compile time)
-    if (IsAtLeastiOSVersion(@"10")) { // iOS 10.0 supported (runtime)
+  if (controlTintColor != nil) {
       vc.preferredControlTintColor = [self colorFromHexString:controlTintColor];
-    } else {
-      vc.view.tintColor = [self colorFromHexString:tintColor];
-    }
-#else
-    vc.view.tintColor = [self colorFromHexString:tintColor];
-#endif
   }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS 10.0 supported
-  if (IsAtLeastiOSVersion(@"10")) { // iOS 10.0 supported (runtime)
-    if (barColor != nil) {
-      vc.preferredBarTintColor = [self colorFromHexString:barColor];
-    }
+  NSString *barColor = options[@"toolbarColor"];
+  if (barColor != nil) {
+    vc.preferredBarTintColor = [self colorFromHexString:barColor];
   }
-#endif
 
   CDVPluginResult * pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{@"event":@"opened"}];
   [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
-}
-
-- (UIModalTransitionStyle) getTransitionStyle:(NSString*) input {
-  if (input == nil) {
-    return UIModalTransitionStyleCoverVertical;
-  } else if ([input isEqualToString:@"curl"]) {
-    return UIModalTransitionStylePartialCurl;
-  } else if ([input isEqualToString:@"fade"]) {
-    return UIModalTransitionStyleCrossDissolve;
-  } else if ([input isEqualToString:@"flip"]) {
-    return UIModalTransitionStyleFlipHorizontal;
-  } else {
-    return UIModalTransitionStyleCoverVertical;
-  }
 }
 
 - (UIColor *)colorFromHexString:(NSString *)hexString {
@@ -151,14 +120,72 @@
   }
 }
 
+
 - (NSArray<UIActivity *> *)safariViewController:(SFSafariViewController *)
               controller activityItemsForURL:(NSURL *)URL
               title:(nullable NSString *)title {
 
-    if(self.activityItemProvider)
+    if (self.activityItemProvider)
         return [self.activityItemProvider safariViewController:controller activityItemsForURL:URL title:title];
     else
         return nil;
+        
+}
+
+- (NSArray<UIActivityType> *)safariViewController:(SFSafariViewController *)controller
+									excludedActivityTypesForURL:(NSURL *)URL
+                                    title:(nullable NSString *)title {
+	if (self.disableSharing)
+	return @[
+		UIActivityTypeAddToReadingList,
+		UIActivityTypeAirDrop,
+		UIActivityTypeAssignToContact,
+		UIActivityTypeCopyToPasteboard,
+		UIActivityTypeMail,
+		UIActivityTypeMarkupAsPDF,
+		UIActivityTypeMessage,
+		UIActivityTypeOpenInIBooks,
+		UIActivityTypePostToFacebook,
+		UIActivityTypePostToFlickr,
+		UIActivityTypePostToTencentWeibo,
+		UIActivityTypePostToTwitter,
+		UIActivityTypePostToVimeo,
+		UIActivityTypePostToWeibo,
+		UIActivityTypePrint,
+		UIActivityTypeSaveToCameraRoll,
+		
+
+		/* does not work
+		@"com.apple.mobilenotes.SharingExtension",
+		@"com.apple.reminders.RemindersEditorExtension",
+		@"com.apple.CloudDocsUI.AddToiCloudDrive",
+		@"com.amazon.Lassen.SendToKindleExtension",
+		@"com.google.chrome.ios.ShareExtension",
+		@"com.google.Drive.ShareExtension",
+		@"com.google.Gmail.ShareExtension",
+		@"com.google.inbox.ShareExtension",
+		@"com.google.hangouts.ShareExtension",
+		@"com.iwilab.KakaoTalk.Share",
+		@"com.facebook.Messenger.ShareExtension",
+		@"com.nhncorp.NaverSearch.ShareExtension",
+		@"com.linkedin.LinkedIn.ShareExtension",
+		@"net.whatsapp.WhatsApp.ShareExtension",
+		@"com.tinyspeck.chatlyio.share", // Slack!
+		@"ph.telegra.Telegraph.Share",
+		@"com.toyopagroup.picaboo.share", // Snapchat!
+		@"com.fogcreek.trello.trelloshare",
+		@"com.hammerandchisel.discord.Share",
+		@"com.riffsy.RiffsyKeyboard.RiffsyShareExtension", //GIF Keyboard by Tenor
+		@"com.ifttt.ifttt.share",
+		@"com.getdropbox.Dropbox.ActionExtension",
+		@"wefwef.YammerShare",
+		@"pinterest.ShareExtension",
+		@"pinterest.ActionExtension",
+		@"us.zoom.videomeetings.Extension",
+		*/
+
+	];
+	else return nil;
 }
 
 @end

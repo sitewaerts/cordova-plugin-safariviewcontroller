@@ -14,7 +14,6 @@ SafariViewController Cordova Plugin
 [twitter-url]:https://twitter.com/eddyverbruggen
 
 ## 0. Index
-
 1. [Description](#1-description)
 2. [Screenshots](#2-screenshots)
 3. [Installation](#3-installation)
@@ -25,9 +24,9 @@ SafariViewController Cordova Plugin
 
 ## 1. Description
 * Use in cases where you'd otherwise use InAppBrowser
-* Use the new and powerful iOS9 viewcontroller to show webcontent in your PhoneGap app
-* Requires XCode 7 / iOS9 SDK to build
-* Requires iOS9 to use, lower versions need to fall back to InAppBrowser (example below!)
+* Use the new and powerful viewcontroller to show webcontent in your Cordova app
+* Requires iOS11+ SDK to build
+* Requires iOS11+ to use, lower versions need to fall back to InAppBrowser (example below!)
 * [Chrome custom tabs](https://developer.chrome.com/multidevice/android/customtabs) are Android's parallel to SafariViewController with even more customizable UI. You can give it a try with the latest version of this plugin. See [the wiki](https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller/wiki) for details.
 
 Note that I didn't decide to clobber window.open to override InAppBrowser when applicable
@@ -47,12 +46,11 @@ Pressing 'Done' returns the user to your app as you'd expect.
 <img src="screenshots/05-curl.PNG" width="350"/>&nbsp;
 <img src="screenshots/06-flip.PNG" width="350"/>&nbsp;
 
-This one has a custom `tintColor` (check the buttons):
+This one has a custom `controlTintColor` (check the buttons):
 
 <img src="screenshots/07-tintColor.PNG" width="350"/>
 
-On iOS 10, you can use `barColor` and `controlTintColor` as well
-(to make sure iOS 9 buttons are not white in the case, pass in a `tintColor` as well):
+You can use `barColor` as well
 
 <img src="screenshots/08-barColor.PNG" width="350"/>
 
@@ -65,18 +63,6 @@ $ cordova plugin add cordova-plugin-safariviewcontroller
 
 *Note*: the plugin requires Cordova Android 7.0.0 or later.
 
-### Graceful fallback to InAppBrowser
-** This section is kinda obsolete by now (with iOS 12 currently being the latest version) **
-
-Since SafariViewController is new in iOS9 you need to have a fallback for older versions (and other platforms),
-so if `available` returns false (see the snippet below) you want to open the URL in the InAppBrowser probably,
-so be sure to include that plugin as well:
-
-```
-$ cordova plugin add cordova-plugin-inappbrowser
-```
-
-I'm not including it as a dependency as not all folks may have this requirement.
 
 ## 4. Usage
 Check the [demo code](demo/index.html) for an easy to drop in example, otherwise copy-paste this:
@@ -88,12 +74,12 @@ function openUrl(url, readerMode) {
       SafariViewController.show({
             url: url,
             hidden: false, // default false. You can use this to load cookies etc in the background (see issue #1 for details).
-            animated: false, // default true, note that 'hide' will reuse this preference (the 'Done' button will always animate though)
-            transition: 'curl', // (this only works in iOS 9.1/9.2 and lower) unless animated is false you can choose from: curl, flip, fade, slide (default)
+            animated: false, // default true, note that 'hide' will reuse this preference (the dismiss button will always animate though)
             enterReaderModeIfAvailable: readerMode, // default false
-            tintColor: "#00ffff", // default is ios blue
-            barColor: "#0000ff", // on iOS 10+ you can change the background color as well
-            controlTintColor: "#ffffff" // on iOS 10+ you can override the default tintColor
+            controlTintColor: "#ffffff", // overrides the default tintColor
+            toolbarColor: "#0000ff", // changes the background color
+            dismissButtonStyle: 2, //default 0, index of enum: ['Done', 'Close', 'Cancel'], invalid values fallback to default
+            barCollapsingEnabled: true, // default is true
           },
           // this success handler will be invoked for the lifecycle events 'opened', 'loaded' and 'closed'
           function(result) {
@@ -180,6 +166,8 @@ Do this:
 
 
 ## 7. Changelog
+* 2.0.1 Dropped properties unsupported in iOS11+, added `dismissButtonStyle` and `barCollapsingEnabled` properties; attempted to add `disable sharing` feature
+* 2.0.0 Support AndroidX
 * 1.6.0 A few changes for Android. See [these closed issues](https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller/milestone/7?closed=1).
 * 1.5.3 Hidden tabs don't get removed on `hide()` (iOS). Thanks #104!
 * 1.4.3 Options weren't correctly passed to native code. Thanks #19!

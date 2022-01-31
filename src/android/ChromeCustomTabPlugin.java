@@ -25,14 +25,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.chromium.customtabsclient.shared.CustomTabsHelper;
 
-public class ChromeCustomTabPlugin extends CordovaPlugin{
+public class ChromeCustomTabPlugin extends CordovaPlugin {
 
     public static final String TAG = "ChromeCustomTabPlugin";
     public static final int CUSTOM_TAB_REQUEST_CODE = 1;
 
     private CustomTabServiceHelper mCustomTabPluginHelper;
     private boolean wasConnected;
-    private  CallbackContext callbackContext;
+    private CallbackContext callbackContext;
     private Bundle mStartAnimationBundle;
 
     @Override
@@ -47,13 +47,14 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
 
         switch (action) {
             case "isAvailable":
-                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, mCustomTabPluginHelper.isAvailable()));
+                callbackContext.sendPluginResult(
+                        new PluginResult(PluginResult.Status.OK, mCustomTabPluginHelper.isAvailable()));
                 return true;
 
             case "show": {
                 final JSONObject options = args.getJSONObject(0);
                 final String url = options.optString("url");
-                if(TextUtils.isEmpty(url)){
+                if (TextUtils.isEmpty(url)) {
                     JSONObject result = new JSONObject();
                     result.put("error", "expected argument 'url' to be non empty string.");
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
@@ -66,11 +67,12 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 String transition = "";
                 mStartAnimationBundle = null;
                 final Boolean animated = options.optBoolean("animated", true);
-                if(animated) transition = options.optString("transition", "slide");
+                if (animated)
+                    transition = options.optString("transition", "slide");
 
                 PluginResult pluginResult;
                 JSONObject result = new JSONObject();
-                if(isAvailable()) {
+                if (isAvailable()) {
                     try {
                         this.show(url, getColor(toolbarColor), showDefaultShareMenuItem, transition);
                         result.put("event", "loaded");
@@ -92,7 +94,8 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 PluginResult pluginResult;
                 final JSONObject result = new JSONObject();
                 result.put("defaultHandler", CustomTabsHelper.getDefaultViewHandlerPackageName(context));
-                result.put("customTabsImplementations", new JSONArray(CustomTabsHelper.getPackagesSupportingCustomTabs(context)));
+                result.put("customTabsImplementations",
+                        new JSONArray(CustomTabsHelper.getPackagesSupportingCustomTabs(context)));
                 pluginResult = new PluginResult(PluginResult.Status.OK, result);
                 callbackContext.sendPluginResult(pluginResult);
                 return true;
@@ -101,7 +104,7 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 PluginResult pluginResult;
                 JSONObject result = new JSONObject();
                 final String packageName = args.optString(0);
-                if(TextUtils.isEmpty(packageName)) {
+                if (TextUtils.isEmpty(packageName)) {
                     result.put("error", "expected argument 'packageName' to be non empty string.");
                     pluginResult = new PluginResult(PluginResult.Status.ERROR, result);
                 } else {
@@ -109,7 +112,7 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                         mCustomTabPluginHelper.setPackageNameToBind(packageName, context);
                         pluginResult = new PluginResult(PluginResult.Status.OK, true);
                     } catch (CustomTabsHelper.InvalidPackageException e) {
-                        pluginResult = new PluginResult(PluginResult.Status.ERROR, "Invalid package: "+packageName);
+                        pluginResult = new PluginResult(PluginResult.Status.ERROR, "Invalid package: " + packageName);
                     }
                 }
                 callbackContext.sendPluginResult(pluginResult);
@@ -119,23 +122,26 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 if (bindCustomTabsService())
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
                 else
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
+                    callbackContext.sendPluginResult(
+                            new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
                 return true;
             }
             case "warmUp": {
                 if (warmUp()) {
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
                 } else {
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Failed to warm up service"));
+                    callbackContext
+                            .sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Failed to warm up service"));
                 }
                 return true;
             }
             case "mayLaunchUrl": {
                 final String url = args.getString(0);
-                if(mayLaunchUrl(url)){
+                if (mayLaunchUrl(url)) {
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
                 } else {
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR,String.format("Failed prepare to launch url: %s", url)));
+                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR,
+                            String.format("Failed prepare to launch url: %s", url)));
                 }
                 return true;
             }
@@ -143,16 +149,16 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
         return false;
     }
 
-    private boolean isAvailable(){
+    private boolean isAvailable() {
         return mCustomTabPluginHelper.isAvailable();
     }
 
     private void show(String url, @ColorInt int toolbarColor, boolean showDefaultShareMenuItem, String transition) {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder(getSession())
                 .setToolbarColor(toolbarColor);
-        if(showDefaultShareMenuItem)
+        if (showDefaultShareMenuItem)
             builder.addDefaultShareMenuItem();
-        if(!TextUtils.isEmpty(transition))
+        if (!TextUtils.isEmpty(transition))
             addTransition(builder, transition);
 
         builder.setShowTitle(true);
@@ -160,8 +166,8 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
         CustomTabsIntent customTabsIntent = builder.build();
 
         String packageName = CustomTabsHelper.getPackageNameToUse(cordova.getActivity());
-        if ( packageName != null ) {
-           customTabsIntent.intent.setPackage(packageName);
+        if (packageName != null) {
+            customTabsIntent.intent.setPackage(packageName);
         }
 
         startCustomTabActivity(url, customTabsIntent.intent);
@@ -169,33 +175,37 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
 
     private void addTransition(CustomTabsIntent.Builder builder, String transition) {
         final String animType = "anim";
-        switch (transition){
+        switch (transition) {
             case ("slide"):
             default:
                 mStartAnimationBundle = ActivityOptionsCompat.makeCustomAnimation(
-                        cordova.getActivity(), getIdentifier("slide_in_right", animType), getIdentifier("slide_out_left", animType)).toBundle();
-                builder.setExitAnimations(cordova.getActivity(), getIdentifier("slide_in_left", animType), getIdentifier("slide_out_right", animType));
+                        cordova.getActivity(), getIdentifier("slide_in_right", animType),
+                        getIdentifier("slide_out_left", animType)).toBundle();
+                builder.setExitAnimations(cordova.getActivity(), getIdentifier("slide_in_left", animType),
+                        getIdentifier("slide_out_right", animType));
         }
     }
 
     private void startCustomTabActivity(String url, Intent intent) {
         intent.setData(Uri.parse(url));
-        if(mStartAnimationBundle == null)
+        if (mStartAnimationBundle == null)
             cordova.startActivityForResult(this, intent, CUSTOM_TAB_REQUEST_CODE);
         else {
             cordova.setActivityResultCallback(this);
-            ActivityCompat.startActivityForResult(cordova.getActivity(), intent, CUSTOM_TAB_REQUEST_CODE, mStartAnimationBundle);
+            ActivityCompat.startActivityForResult(cordova.getActivity(), intent, CUSTOM_TAB_REQUEST_CODE,
+                    mStartAnimationBundle);
         }
     }
 
-    private boolean warmUp(){
+    private boolean warmUp() {
         boolean success = false;
         final CustomTabsClient client = mCustomTabPluginHelper.getClient();
-        if (client != null) success = client.warmup(0);
+        if (client != null)
+            success = client.warmup(0);
         return success;
     }
 
-    private boolean mayLaunchUrl(String url){
+    private boolean mayLaunchUrl(String url) {
         boolean success = false;
         if (mCustomTabPluginHelper.getClient() != null) {
             CustomTabsSession session = getSession();
@@ -206,7 +216,8 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
     }
 
     private int getColor(String color) {
-        if(TextUtils.isEmpty(color)) return Color.LTGRAY;
+        if (TextUtils.isEmpty(color))
+            return Color.LTGRAY;
 
         try {
             return Color.parseColor(color);
@@ -231,7 +242,7 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        if(requestCode == CUSTOM_TAB_REQUEST_CODE){
+        if (requestCode == CUSTOM_TAB_REQUEST_CODE) {
             JSONObject result = new JSONObject();
             try {
                 result.put("event", "closed");
@@ -239,7 +250,7 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 e.printStackTrace();
             }
 
-            if(callbackContext != null){
+            if (callbackContext != null) {
                 callbackContext.success(result);
                 callbackContext = null;
             }
@@ -259,7 +270,7 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
 
     @Override
     public void onStart() {
-        if(wasConnected){
+        if (wasConnected) {
             bindCustomTabsService();
         }
         super.onStart();
