@@ -198,11 +198,16 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
     }
 
     private boolean warmUp() {
-        boolean success = false;
         final CustomTabsClient client = mCustomTabPluginHelper.getClient();
         if (client != null)
-            success = client.warmup(0);
-        return success;
+        {
+            Log.i(TAG, "warmUp: client found: " + client);
+            final boolean success = client.warmup(0);
+            Log.i(TAG, "warmUp: " + (success ? "success" : "failed"));
+            return success;
+        }
+        Log.w(TAG, "warmUp: no client");
+        return false;
     }
 
     private boolean mayLaunchUrl(String url) {
