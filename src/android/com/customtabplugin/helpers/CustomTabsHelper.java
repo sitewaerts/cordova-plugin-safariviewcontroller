@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -141,10 +142,21 @@ public class CustomTabsHelper {
     /**
      * @return All possible chrome package names that provide custom tabs feature.
      */
-    public static String[] getPackages() {
-        return new String[]{"", STABLE_PACKAGE, BETA_PACKAGE, DEV_PACKAGE, LOCAL_PACKAGE};
+    public static String[] getChromePackages() {
+        return new String[]{STABLE_PACKAGE, BETA_PACKAGE, DEV_PACKAGE, LOCAL_PACKAGE};
     }
 
+    public static String useChrome(Context context) throws InvalidPackageException{
+        for (String packageName: getChromePackages())
+        {
+            if (getPackagesSupportingCustomTabs(context).contains(packageName))
+            {
+                sPackageNameToUse = packageName;
+                return sPackageNameToUse;
+            }
+        }
+        throw new InvalidPackageException(Arrays.asList(getChromePackages()).toString());
+    }
     public static void setPackageNameToUse(String packageName, Context context) throws InvalidPackageException{
         if (getPackagesSupportingCustomTabs(context).contains(packageName)) {
             sPackageNameToUse = packageName;

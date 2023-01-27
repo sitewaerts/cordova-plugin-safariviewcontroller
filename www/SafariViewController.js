@@ -22,6 +22,9 @@ module.exports = {
   getViewHandlerPackages: function (onSuccess, onError) {
     exec(onSuccess, onError, "SafariViewController", "getViewHandlerPackages", []);
   },
+  useChrome: function (onSuccess, onError) {
+    exec(onSuccess, onError, "SafariViewController", "useChrome", []);
+  },
   useCustomTabsImplementation: function (packageName, onSuccess, onError) {
     exec(onSuccess, onError, "SafariViewController", "useCustomTabsImplementation", [packageName]);
   },

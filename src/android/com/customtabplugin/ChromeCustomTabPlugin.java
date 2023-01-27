@@ -117,6 +117,17 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
                 callbackContext.sendPluginResult(pluginResult);
                 return true;
             }
+            case "useChrome": {
+                PluginResult pluginResult;
+                try {
+                    mCustomTabPluginHelper.useChrome(context);
+                    pluginResult = new PluginResult(PluginResult.Status.OK, true);
+                } catch (CustomTabsHelper.InvalidPackageException e) {
+                    pluginResult = new PluginResult(PluginResult.Status.ERROR, "Chrome not available");
+                }
+                callbackContext.sendPluginResult(pluginResult);
+                return true;
+            }
             case "connectToService": {
                 bindCustomTabsService(new BooleanCallback(){
                     public void done(boolean success){

@@ -39,6 +39,10 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
         return !TextUtils.isEmpty(mPackageNameToBind);
     }
 
+    public void useChrome(Context context) throws CustomTabsHelper.InvalidPackageException {
+        mPackageNameToBind = CustomTabsHelper.useChrome(context);
+    }
+
     public void setPackageNameToBind(String packageName, Context context) throws CustomTabsHelper.InvalidPackageException {
         CustomTabsHelper.setPackageNameToUse(packageName, context);
         mPackageNameToBind = packageName;
