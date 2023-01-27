@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import androidx.annotation.ColorInt;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
@@ -23,7 +22,7 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.chromium.customtabsclient.shared.CustomTabsHelper;
+import com.customtabplugin.helpers.*;
 
 public class ChromeCustomTabPlugin extends CordovaPlugin {
 
@@ -63,10 +62,10 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
                 }
 
                 final String toolbarColor = options.optString("toolbarColor");
-                final Boolean showDefaultShareMenuItem = options.optBoolean("showDefaultShareMenuItem");
+                final boolean showDefaultShareMenuItem = options.optBoolean("showDefaultShareMenuItem");
                 String transition = "";
                 mStartAnimationBundle = null;
-                final Boolean animated = options.optBoolean("animated", true);
+                final boolean animated = options.optBoolean("animated", true);
                 if (animated)
                     transition = options.optString("transition", "slide");
 
@@ -119,20 +118,27 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
                 return true;
             }
             case "connectToService": {
-                if (bindCustomTabsService())
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
-                else
-                    callbackContext.sendPluginResult(
-                            new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
+                bindCustomTabsService(new BooleanCallback(){
+                    public void done(boolean success){
+                        if (success)
+                            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
+                        else
+                            callbackContext.sendPluginResult(
+                                    new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
+                    }
+                });
                 return true;
             }
             case "warmUp": {
-                if (warmUp()) {
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
-                } else {
-                    callbackContext
-                            .sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Failed to warm up service"));
-                }
+                warmUp(new BooleanCallback(){
+                    public void done(boolean success){
+                        if (success)
+                            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
+                        else
+                            callbackContext
+                                    .sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Failed to warm up service"));
+                    }
+                });
                 return true;
             }
             case "mayLaunchUrl": {
@@ -143,6 +149,11 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
                     callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR,
                             String.format("Failed prepare to launch url: %s", url)));
                 }
+                return true;
+            }
+            case "hide": {
+                cordova.getActivity().startActivity(new Intent(cordova.getActivity(), cordova.getActivity().getClass()));
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
                 return true;
             }
         }
@@ -197,17 +208,18 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
         }
     }
 
-    private boolean warmUp() {
+    private void warmUp(BooleanCallback callback) {
         final CustomTabsClient client = mCustomTabPluginHelper.getClient();
         if (client != null)
         {
             Log.i(TAG, "warmUp: client found: " + client);
             final boolean success = client.warmup(0);
             Log.i(TAG, "warmUp: " + (success ? "success" : "failed"));
-            return success;
+            callback.done(success);
+            return;
         }
         Log.w(TAG, "warmUp: no client");
-        return false;
+        callback.done(false);
     }
 
     private boolean mayLaunchUrl(String url) {
@@ -236,8 +248,8 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
         return mCustomTabPluginHelper.getSession();
     }
 
-    private boolean bindCustomTabsService() {
-        return mCustomTabPluginHelper.bindCustomTabsService(cordova.getActivity());
+    private boolean bindCustomTabsService(BooleanCallback callback) {
+        return mCustomTabPluginHelper.bindCustomTabsService(cordova.getActivity(), callback);
     }
 
     private boolean unbindCustomTabsService() {
@@ -276,7 +288,13 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
     @Override
     public void onStart() {
         if (wasConnected) {
-            bindCustomTabsService();
+            bindCustomTabsService(new BooleanCallback()
+            {
+                public void done(boolean success)
+                {
+                    // nothing to do
+                }
+            });
         }
         super.onStart();
     }

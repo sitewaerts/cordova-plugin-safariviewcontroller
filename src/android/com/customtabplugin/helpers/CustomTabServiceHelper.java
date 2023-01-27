@@ -1,7 +1,7 @@
 // mostly copied from:
 // https://github.com/GoogleChrome/custom-tabs-client/blob/master/demos/src/main/java/org/chromium/customtabsdemos/CustomTabActivityHelper.java
 
-package com.customtabplugin;
+package com.customtabplugin.helpers;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,16 +9,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.browser.customtabs.CustomTabsClient;
-import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
 import android.text.TextUtils;
 
-import org.chromium.customtabsclient.shared.CustomTabsHelper;
-import org.chromium.customtabsclient.shared.ServiceConnection;
-import org.chromium.customtabsclient.shared.ServiceConnectionCallback;
+import com.customtabplugin.ChromeCustomTabPlugin;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is a helper class to manage the connection to the Custom Tabs Service.
@@ -80,25 +79,42 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
         this.mConnectionCallback = connectionCallback;
     }
 
+    private final Set<ServiceConnectionCallback> onConnectOnce = new HashSet<>();
+
     /**
      * Binds the Activity to the Custom Tabs Service.
-     * @param activity the activity to be binded to the service.
+     * @param activity the activity to be bound to the service.
+     * @param callback
      */
-    public boolean bindCustomTabsService(Activity activity) {
+    public void bindCustomTabsService(Activity activity, final BooleanCallback callback) {
         if (mClient != null) {
             Log.i(TAG, "bindCustomTabsService: already bound");
-            return true;
+            callback.done(true);
+            return;
         }
 
         if (mPackageNameToBind == null)
         {
             Log.w(TAG, "bindCustomTabsService: no package name specified");
-            return false;
+            callback.done(false);
+            return;
         };
+
+        this.onConnectOnce.add(new ServiceConnectionCallback()
+        {
+            public void onServiceConnected(CustomTabsClient client)
+            {
+                callback.done(client!=null);
+            }
+
+            public void onServiceDisconnected()
+            {
+                callback.done(false);
+            }
+        });
 
         mConnection = new ServiceConnection(this);
         CustomTabsClient.bindCustomTabsService(activity, mPackageNameToBind, mConnection);
-        return true;
     }
 
     /**
@@ -119,6 +135,9 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
         Log.w(TAG, "onServiceConnected: " + client);
         mClient = client;
         if (mConnectionCallback != null) mConnectionCallback.onCustomTabsConnected();
+        for (ServiceConnectionCallback cb : this.onConnectOnce)
+            cb.onServiceConnected(client);
+        this.onConnectOnce.clear();
     }
 
     @Override
@@ -127,6 +146,9 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
         mClient = null;
         mCustomTabsSession = null;
         if (mConnectionCallback != null) mConnectionCallback.onCustomTabsDisconnected();
+        for (ServiceConnectionCallback cb : this.onConnectOnce)
+            cb.onServiceDisconnected();
+        this.onConnectOnce.clear();
     }
 
     public CustomTabsClient getClient() {
