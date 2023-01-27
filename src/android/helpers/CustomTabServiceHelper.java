@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
@@ -24,6 +25,7 @@ import java.util.List;
  */
 public class CustomTabServiceHelper implements ServiceConnectionCallback {
 
+    public static final String TAG = ChromeCustomTabPlugin.TAG + ".CustomTabServiceHelper";
     private String mPackageNameToBind;
     private CustomTabsSession mCustomTabsSession;
     private CustomTabsClient mClient;
@@ -83,9 +85,16 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
      * @param activity the activity to be binded to the service.
      */
     public boolean bindCustomTabsService(Activity activity) {
-        if (mClient != null) return false;
+        if (mClient != null) {
+            Log.w(TAG, "bindCustomTabsService: cannot bind twice");
+            return false;
+        }
 
-        if (mPackageNameToBind == null) return false;
+        if (mPackageNameToBind == null)
+        {
+            Log.w(TAG, "bindCustomTabsService: no package name specified");
+            return false;
+        };
 
         mConnection = new ServiceConnection(this);
         CustomTabsClient.bindCustomTabsService(activity, mPackageNameToBind, mConnection);
