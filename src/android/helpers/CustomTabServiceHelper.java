@@ -86,8 +86,8 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
      */
     public boolean bindCustomTabsService(Activity activity) {
         if (mClient != null) {
-            Log.w(TAG, "bindCustomTabsService: cannot bind twice");
-            return false;
+            // already bound
+            return true;
         }
 
         if (mPackageNameToBind == null)
