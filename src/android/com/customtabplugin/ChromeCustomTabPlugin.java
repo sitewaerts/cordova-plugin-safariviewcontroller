@@ -248,8 +248,8 @@ public class ChromeCustomTabPlugin extends CordovaPlugin {
         return mCustomTabPluginHelper.getSession();
     }
 
-    private boolean bindCustomTabsService(BooleanCallback callback) {
-        return mCustomTabPluginHelper.bindCustomTabsService(cordova.getActivity(), callback);
+    private void bindCustomTabsService(BooleanCallback callback) {
+        mCustomTabPluginHelper.bindCustomTabsService(cordova.getActivity(), callback);
     }
 
     private boolean unbindCustomTabsService() {
