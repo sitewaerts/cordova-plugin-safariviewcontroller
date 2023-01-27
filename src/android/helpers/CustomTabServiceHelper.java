@@ -86,7 +86,7 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
      */
     public boolean bindCustomTabsService(Activity activity) {
         if (mClient != null) {
-            // already bound
+            Log.i(TAG, "bindCustomTabsService: already bound");
             return true;
         }
 
@@ -116,12 +116,14 @@ public class CustomTabServiceHelper implements ServiceConnectionCallback {
 
     @Override
     public void onServiceConnected(CustomTabsClient client) {
+        Log.w(TAG, "onServiceConnected: " + client);
         mClient = client;
         if (mConnectionCallback != null) mConnectionCallback.onCustomTabsConnected();
     }
 
     @Override
     public void onServiceDisconnected() {
+        Log.w(TAG, "onServiceDisconnected");
         mClient = null;
         mCustomTabsSession = null;
         if (mConnectionCallback != null) mConnectionCallback.onCustomTabsDisconnected();
