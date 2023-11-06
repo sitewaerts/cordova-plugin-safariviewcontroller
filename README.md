@@ -131,6 +131,7 @@ function dismissSafari()
 
 function forceChrome(success, error)
 {
+    // available on Android only
     SafariViewController.useChrome(function ()
     {
         // chrome is available and will be used
