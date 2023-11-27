@@ -24,7 +24,6 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.chromium.customtabsclient.shared.CustomTabsHelper;
 import com.customtabplugin.helpers.CustomTabServiceHelper;
 import com.customtabplugin.helpers.CustomTabsHelper;
 
