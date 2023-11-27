@@ -7,15 +7,10 @@ SafariViewController Cordova Plugin
 [![Twitter Follow][twitter-image]][twitter-url]
 
 [npm-image]:http://img.shields.io/npm/v/cordova-plugin-safariviewcontroller.svg
-
 [npm-url]:https://npmjs.org/package/cordova-plugin-safariviewcontroller
-
 [downloads-image]:http://img.shields.io/npm/dm/cordova-plugin-safariviewcontroller.svg
-
 [total-downloads-image]:http://img.shields.io/npm/dt/cordova-plugin-safariviewcontroller.svg?label=total%20downloads
-
 [twitter-image]:https://img.shields.io/twitter/follow/eddyverbruggen.svg?style=social&label=Follow%20me
-
 [twitter-url]:https://twitter.com/eddyverbruggen
 
 ## 0. Index
@@ -29,21 +24,17 @@ SafariViewController Cordova Plugin
 7. [Changelog](#7-changelog)
 
 ## 1. Description
-
 * Use in cases where you'd otherwise use InAppBrowser
-* Use the new and powerful viewcontroller to show webcontent in your Cordova app
+* Use the new and powerful iOS9 viewcontroller to show webcontent in your Cordova app
 * Requires iOS11+ SDK to build
 * Requires iOS11+ to use, lower versions need to fall back to InAppBrowser (example below!)
-* [Chrome custom tabs](https://developer.chrome.com/multidevice/android/customtabs) are Android's parallel to
-  SafariViewController with even more customizable UI. You can give it a try with the latest version of this plugin.
-  See [the wiki](https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller/wiki) for details.
+* [Chrome custom tabs](https://developer.chrome.com/multidevice/android/customtabs) are Android's parallel to SafariViewController with even more customizable UI. You can give it a try with the latest version of this plugin. See [the wiki](https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller/wiki) for details.
 
 Note that I didn't decide to clobber window.open to override InAppBrowser when applicable
 because that would mean you could never use InAppBrowser in case you need its advanced features
 in one place and are happy with a simple readonly view in other cases.
 
 ## 2. Screenshots
-
 As you can see from these shots: you can preload a page in reader mode or normal mode,
 and Safari gives you the option to use the share sheet!
 
@@ -65,7 +56,6 @@ You can use `barColor` as well
 <img src="screenshots/08-barColor.PNG" width="350"/>
 
 ## 3. Installation
-
 To install the plugin with the Cordova CLI from npm:
 
 ```
@@ -75,58 +65,44 @@ $ cordova plugin add cordova-plugin-safariviewcontroller
 *Note*: the plugin requires Cordova Android 7.0.0 or later.
 
 ## 4. Usage
-
 Check the [demo code](demo/index.html) for an easy to drop in example, otherwise copy-paste this:
 
 ```js
-function openUrl(url, readerMode)
-{
-    SafariViewController.isAvailable(function (available)
-    {
-        if (available)
-        {
-            SafariViewController.show({
-                    url: url,
-                    hidden: false, // default false. You can use this to load cookies etc in the background (see issue #1 for details).
-                    animated: false, // default true, note that 'hide' will reuse this preference (the dismiss button will always animate though)
-                    enterReaderModeIfAvailable: readerMode, // default false
-                    controlTintColor: "#ffffff", // overrides the default tintColor
-                    toolbarColor: "#0000ff", // changes the background color
-                    dismissButtonStyle: 2, //default 0, index of enum: ['Done', 'Close', 'Cancel'], invalid values fallback to default
-                    barCollapsingEnabled: true, // default is true
-                },
-                // this success handler will be invoked for the lifecycle events 'opened', 'loaded' and 'closed'
-                function (result)
-                {
-                    if (result.event === 'opened')
-                    {
-                        console.log('opened');
-                    }
-                    else if (result.event === 'loaded')
-                    {
-                        console.log('loaded');
-                    }
-                    else if (result.event === 'closed')
-                    {
-                        console.log('closed');
-                    }
-                },
-                function (msg)
-                {
-                    console.log("KO: " + msg);
-                })
-        }
-        else
-        {
-            // potentially powered by InAppBrowser because that (currently) clobbers window.open
-            window.open(url, '_blank', 'location=yes');
-        }
-    })
+function openUrl(url, readerMode) {
+  SafariViewController.isAvailable(function (available) {
+    if (available) {
+      SafariViewController.show({
+            url: url,
+            hidden: false, // default false. You can use this to load cookies etc in the background (see issue #1 for details).
+            animated: false, // default true, note that 'hide' will reuse this preference (the 'Done' button will always animate though)
+            enterReaderModeIfAvailable: readerMode, // default false
+            controlTintColor: "#00ffff", //overrides the default tintColor
+            toolbarColor: "#0000ff", //  changes the background color
+            dismissButtonStyle: 2, //default 0, index of enum: ['Done', 'Close', 'Cancel'], invalid values fallback to default
+            barCollapsingEnabled: true, // default is true
+          },
+          // this success handler will be invoked for the lifecycle events 'opened', 'loaded' and 'closed'
+          function(result) {
+            if (result.event === 'opened') {
+              console.log('opened');
+            } else if (result.event === 'loaded') {
+              console.log('loaded');
+            } else if (result.event === 'closed') {
+              console.log('closed');
+            }
+          },
+          function(msg) {
+            console.log("KO: " + msg);
+          })
+    } else {
+      // potentially powered by InAppBrowser because that (currently) clobbers window.open
+      window.open(url, '_blank', 'location=yes');
+    }
+  })
 }
 
-function dismissSafari()
-{
-    SafariViewController.hide()
+function dismissSafari() {
+  SafariViewController.hide()
 }
 
 function forceChrome(success, error)
@@ -145,30 +121,19 @@ function forceChrome(success, error)
 ```
 
 ## 5. Advantages over InAppBrowser
-
-* InAppBrowser uses the slow UIWebView (even when you're using a WKWebView plugin!), this plugin uses the ultra fast
-  Safari Webview.
+* InAppBrowser uses the slow UIWebView (even when you're using a WKWebView plugin!), this plugin uses the ultra fast Safari Webview.
 * This is now Apple's recommended way to use a browser in your app.
 * A nicer / cleaner UI which is consistent with Safari and all other apps using a `SFSafariViewController`.
-* Whereas `cordova-plugin-inappbrowser` is affected
-  by [ATS](https://developer.apple.com/library/prerelease/ios/technotes/App-Transport-Security-Technote/), this plugin
-  is not. This means you can even load `http` URL's without whitelisting them.
-* Since iOS 9.2 or 9.3 you can swipe to go back to your app. Unfortunately, in favor of this Apple dropped the option to
-  provide a custom transition (curl/flip/..) when presenting Safari.
+* Whereas `cordova-plugin-inappbrowser` is affected by [ATS](https://developer.apple.com/library/prerelease/ios/technotes/App-Transport-Security-Technote/), this plugin is not. This means you can even load `http` URL's without whitelisting them.
+* Since iOS 9.2 or 9.3 you can swipe to go back to your app. Unfortunately, in favor of this Apple dropped the option to provide a custom transition (curl/flip/..) when presenting Safari.
 
 ## 6. Reading Safari Data and Cookies with Cordova
 
-SFSafariViewController implements "real" Safari, meaning private data like cookies and Keychain passwords are available
-to the user. However, for security, this means that communication features such as javascript, CSS injection and some
-callbacks that are available in UIWebView are not available in SFSafariViewController.
+SFSafariViewController implements "real" Safari, meaning private data like cookies and Keychain passwords are available to the user. However, for security, this means that communication features such as javascript, CSS injection and some callbacks that are available in UIWebView are not available in SFSafariViewController.
 
-To pass data from a web page loaded in SFSafariViewController back to your Cordova app, you can use a Custom URL Scheme
-such as _<mycoolapp://data?to=pass>_. You will need to install an addition plugin to handle receiving data passed via
-URL Scheme in your Cordova app.
+To pass data from a web page loaded in SFSafariViewController back to your Cordova app, you can use a Custom URL Scheme such as _<mycoolapp://data?to=pass>_.  You will need to install an addition plugin to handle receiving data passed via URL Scheme in your Cordova app.
 
-Combining the URL Scheme technique with the HIDDEN option in this plugin means you can effectively read data from Safari
-in the background of your Cordova app. This could be useful for automatically logging in a user to your app if they
-already have a user token saved as a cookie in Safari.
+Combining the URL Scheme technique with the HIDDEN option in this plugin means you can effectively read data from Safari in the background of your Cordova app. This could be useful for automatically logging in a user to your app if they already have a user token saved as a cookie in Safari.
 
 Do this:
 
@@ -213,13 +178,12 @@ Do this:
     }
     ```
 
-## 7. Changelog
 
+## 7. Changelog
 * 2.0.1 Dropped properties unsupported in iOS11+, added `dismissButtonStyle` and `barCollapsingEnabled` properties;
   attempted to add `disable sharing` feature
 * 2.0.0 Support AndroidX
-* 1.6.0 A few changes for Android.
-  See [these closed issues](https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller/milestone/7?closed=1).
+* 1.6.0 A few changes for Android. See [these closed issues](https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller/milestone/7?closed=1).
 * 1.5.3 Hidden tabs don't get removed on `hide()` (iOS). Thanks #104!
 * 1.4.3 Options weren't correctly passed to native code. Thanks #19!
 * 1.4.2 When passing a URL not starting with http/https the error callback will be invoked.
