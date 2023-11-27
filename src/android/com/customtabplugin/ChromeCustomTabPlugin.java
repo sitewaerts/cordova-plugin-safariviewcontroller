@@ -6,26 +6,21 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
+import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.ColorInt;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.browser.customtabs.CustomTabsSession;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
-import android.text.TextUtils;
-import android.util.Log;
 import com.customtabplugin.helpers.BooleanCallback;
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.PluginResult;
+import com.customtabplugin.helpers.CustomTabServiceHelper;
+import com.customtabplugin.helpers.CustomTabsHelper;
+import org.apache.cordova.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.customtabplugin.helpers.CustomTabServiceHelper;
-import com.customtabplugin.helpers.CustomTabsHelper;
 
 public class ChromeCustomTabPlugin extends CordovaPlugin{
 
@@ -64,10 +59,10 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 }
 
                 final String toolbarColor = options.optString("toolbarColor");
-                final Boolean showDefaultShareMenuItem = options.optBoolean("showDefaultShareMenuItem");
+                final boolean showDefaultShareMenuItem = options.optBoolean("showDefaultShareMenuItem");
                 String transition = "";
                 mStartAnimationBundle = null;
-                final Boolean animated = options.optBoolean("animated", true);
+                final boolean animated = options.optBoolean("animated", true);
                 if(animated) transition = options.optString("transition", "slide");
 
                 PluginResult pluginResult;
@@ -118,14 +113,12 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 return true;
             }
             case "connectToService": {
-                bindCustomTabsService(new BooleanCallback(){
-                    public void done(boolean success){
-                        if (success)
-                            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
-                        else
-                            callbackContext.sendPluginResult(
-                                    new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
-                    }
+                bindCustomTabsService(success -> {
+                    if (success)
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
+                    else
+                        callbackContext.sendPluginResult(
+                                new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
                 });
                 return true;
             }
