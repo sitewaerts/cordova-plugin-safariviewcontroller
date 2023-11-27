@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import com.customtabplugin.helpers.BooleanCallback;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
@@ -24,6 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.chromium.customtabsclient.shared.CustomTabsHelper;
+import com.customtabplugin.helpers.CustomTabServiceHelper;
+import com.customtabplugin.helpers.CustomTabsHelper;
 
 public class ChromeCustomTabPlugin extends CordovaPlugin{
 
@@ -116,10 +119,15 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
                 return true;
             }
             case "connectToService": {
-                if (bindCustomTabsService())
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
-                else
-                    callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
+                bindCustomTabsService(new BooleanCallback(){
+                    public void done(boolean success){
+                        if (success)
+                            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, true));
+                        else
+                            callbackContext.sendPluginResult(
+                                    new PluginResult(PluginResult.Status.ERROR, "Failed to connect to service"));
+                    }
+                });
                 return true;
             }
             case "warmUp": {
@@ -224,13 +232,14 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
         return mCustomTabPluginHelper.getSession();
     }
 
-    private boolean bindCustomTabsService() {
-        return mCustomTabPluginHelper.bindCustomTabsService(cordova.getActivity());
+    private void bindCustomTabsService(BooleanCallback callback) {
+        mCustomTabPluginHelper.bindCustomTabsService(cordova.getActivity(), callback);
     }
 
     private boolean unbindCustomTabsService() {
         return mCustomTabPluginHelper.unbindCustomTabsService(cordova.getActivity());
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -263,8 +272,14 @@ public class ChromeCustomTabPlugin extends CordovaPlugin{
 
     @Override
     public void onStart() {
-        if(wasConnected){
-            bindCustomTabsService();
+        if (wasConnected) {
+            bindCustomTabsService(new BooleanCallback()
+            {
+                public void done(boolean success)
+                {
+                    // nothing to do
+                }
+            });
         }
         super.onStart();
     }
