@@ -59,18 +59,18 @@ module.exports = {
   },
   /**
    * available on Android only
-   * @param {()=>void} onSuccess
-   * @param {(error:any)=>void} onError
+   * @param {()=>void} [onSuccess]
+   * @param {(error:any)=>void} [onError]
    */
-  connectToService: function ([onSuccess], [onError]) {
+  connectToService: function (onSuccess, onError) {
     exec(onSuccess, onError, "SafariViewController", "connectToService", []);
   },
   /**
    * available on Android only
-   * @param {()=>void} onSuccess
-   * @param {(error:any)=>void} onError
+   * @param {()=>void} [onSuccess]
+   * @param {(error:any)=>void} [onError]
    */
-  warmUp: function ([onSuccess], [onError]) {
+  warmUp: function (onSuccess, onError) {
     exec(onSuccess, onError, "SafariViewController", "warmUp", []);
   },
   /**
