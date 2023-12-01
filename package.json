@@ -9,6 +9,7 @@
 	  "android"
     ]
   },
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EddyVerbruggen/cordova-plugin-safariviewcontroller.git"
